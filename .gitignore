@@ -52,3 +52,7 @@ pnpm-debug.log*
 # === dbdiagram/export files ===
 *.db
 *.sqlite3
+
+# Celery Beat schedule file (runtime)
+celerybeat-schedule
+celerybeat-schedule.*

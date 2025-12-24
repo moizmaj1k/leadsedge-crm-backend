@@ -28,7 +28,7 @@ services:
     depends_on:
       - db
       - redis
-    command: bash -c "python src/manage.py migrate && python src/manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python src/manage.py runserver 0.0.0.0:8000"
     environment:
       - PYTHONPATH=/app/src 
       - DJANGO_SETTINGS_MODULE=config.settings  
