@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-leadsedge}
+      POSTGRES_USER: ${POSTGRES_USER:-leadsedge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-leadsedge}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ../..
+      dockerfile: compose/local/Dockerfile
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    command: bash -c "python src/manage.py migrate && python src/manage.py runserver 0.0.0.0:8000"
+    environment:
+      - PYTHONPATH=/app/src 
+      - DJANGO_SETTINGS_MODULE=config.settings  
+
+  celery_worker:
+    build:
+      context: ../..
+      dockerfile: compose/local/Dockerfile
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../:/app
+    depends_on:
+      - db
+      - redis
+    command: celery -A config worker -l info
+    environment:
+      - PYTHONPATH=/app/src 
+      - DJANGO_SETTINGS_MODULE=config.settings 
+
+  celery_beat:
+    build:
+      context: ../..
+      dockerfile: compose/local/Dockerfile
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../:/app
+    depends_on:
+      - db
+      - redis
+    command: celery -A config beat -l info
+    environment:
+      - PYTHONPATH=/app/src 
+      - DJANGO_SETTINGS_MODULE=config.settings 
+
+volumes:
+  pgdata:

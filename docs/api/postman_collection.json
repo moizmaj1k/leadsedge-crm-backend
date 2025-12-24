@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "LeadsEdge CRM API (Phase 1)",
+    "_postman_id": "00000000-0000-0000-0000-000000000001",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (JWT)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/login/", "host": ["{{base_url}}"], "path": ["api", "auth", "login", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@leadsedge.com\",\n  \"password\": \"Admin123!\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.environment.set('access_token', json.access);",
+                  "pm.environment.set('refresh_token', json.refresh);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "X-Team-ID", "value": "{{team_id}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/auth/me/", "host": ["{{base_url}}"], "path": ["api", "auth", "me", ""] }
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/refresh/", "host": ["{{base_url}}"], "path": ["api", "auth", "refresh", ""] },
+            "body": { "mode": "raw", "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["const json = pm.response.json();", "pm.environment.set('access_token', json.access);"] }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
